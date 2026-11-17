@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Presentes de Natal</title>
+<style>
+  :root{
+    --bg:#faf6ee; --card:#ffffff; --ink:#1f2a24; --muted:#5b665f;
+    --green:#1f5a3d; --green-dark:#154130; --red:#b3261e; --line:#e4dccb; --chip:#e8f1ec;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.4}
+  header{background:var(--green);color:#fff;padding:20px 16px}
+  header h1{margin:0 0 4px;font-size:1.5rem}
+  header p{margin:0;opacity:.9;font-size:.95rem}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px}
+  .who{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}
+  .who label{font-weight:600}
+  select,input[type=text],input[type=url]{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);min-height:44px}
+  button{font:inherit;cursor:pointer;min-height:44px;border-radius:8px;border:1px solid var(--green);background:var(--green);color:#fff;padding:0 14px}
+  button:hover{background:var(--green-dark)}
+  button.ghost{background:#fff;color:var(--green)}
+  button.ghost:hover{background:var(--chip)}
+  button.danger{background:#fff;color:var(--red);border-color:var(--line)}
+  button.danger:hover{background:#fdecea}
+  .banner{background:#fff3cd;border:1px solid #e6cf7a;color:#5a4700;padding:10px 12px;border-radius:8px;margin:12px 0;font-size:.9rem}
+  .banner.err{background:#fdecea;border-color:#e3a8a3;color:#7a1712}
+  .cols{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:40px}
+  @media(min-width:760px){.cols{grid-template-columns:1fr 1fr}}
+  .col{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .col h2{margin:0;font-size:1.3rem;color:var(--green)}
+  .progress{color:var(--muted);font-size:.9rem;margin:2px 0 12px}
+  form.add{display:grid;gap:8px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  form.add .row{display:flex;gap:8px;flex-wrap:wrap}
+  form.add .row > *{flex:1 1 140px}
+  ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  li{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:8px}
+  li.done .title{text-decoration:line-through;color:var(--muted)}
+  .top{display:flex;gap:10px;align-items:flex-start}
+  .top input[type=checkbox]{width:24px;height:24px;margin-top:2px;flex:none;accent-color:var(--green)}
+  .title{font-weight:600;overflow-wrap:anywhere}
+  .title a{color:var(--green)}
+  .bottom{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .chip{background:var(--chip);color:var(--green-dark);border-radius:999px;padding:4px 12px;font-size:.9rem;font-weight:600}
+  .free{color:var(--muted);font-size:.9rem}
+  .spacer{flex:1}
+  .empty{color:var(--muted);font-style:italic;padding:8px 0}
+  :focus-visible{outline:3px solid #f0b429;outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>🎄 Presentes de Natal</h1>
+    <p>Adicione ideias, marque quem vai dar cada uma e confirme quando comprar.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="banner"></div>
+
+  <div class="who">
+    <label for="me">Quem é você?</label>
+    <select id="me"></select>
+  </div>
+
+  <div class="cols">
+    <section class="col" data-kid="Benicio" aria-labelledby="h-Benicio">
+      <h2 id="h-Benicio">Benicio</h2>
+      <div class="progress" data-progress></div>
+      <form class="add">
+        <input type="text" name="title" placeholder="Presente (ex.: Lego, tênis, livro)" required maxlength="120" aria-label="Presente para Benicio">
+        <div class="row">
+          <input type="text" inputmode="url" autocapitalize="off" name="link" placeholder="Link (opcional)" aria-label="Link do presente">
+          <select name="giver" aria-label="Quem vai dar"></select>
+        </div>
+        <button type="submit">Adicionar para Benicio</button>
+      </form>
+      <ul data-list></ul>
+    </section>
+
+    <section class="col" data-kid="Tomas" aria-labelledby="h-Tomas">
+      <h2 id="h-Tomas">Tomas</h2>
+      <div class="progress" data-progress></div>
+      <form class="add">
+        <input type="text" name="title" placeholder="Presente (ex.: Lego, tênis, livro)" required maxlength="120" aria-label="Presente para Tomas">
+        <div class="row">
+          <input type="text" inputmode="url" autocapitalize="off" name="link" placeholder="Link (opcional)" aria-label="Link do presente">
+          <select name="giver" aria-label="Quem vai dar"></select>
+        </div>
+        <button type="submit">Adicionar para Tomas</button>
+      </form>
+      <ul data-list></ul>
+    </section>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* ============ CONFIGURAÇÃO ============ */
+// Cole aqui a config do seu projeto Firebase (veja as instruções).
+// Enquanto databaseURL estiver vazio, a página funciona em MODO LOCAL (só neste aparelho).
+const FIREBASE_CONFIG = {
+  apiKey: "",
+  authDomain: "",
+  databaseURL: "",   // ex.: "https://SEU-PROJETO-default-rtdb.firebaseio.com"
+  projectId: "",
+  appId: ""
+};
+const NAMES = ["Rodrigo", "Ana Paula", "Luciana", "Denise", "Maria Fernanda", "Neusa"];
+const KIDS  = ["Benicio", "Tomas"];
+/* ===================================== */
+
+const $ = (s, r = document) => r.querySelector(s);
+let items = {};          // id -> item
+let me = localStorage.getItem("gift_me") || "";
+
+/* ---------- Armazenamento (Firebase ou local) ---------- */
+const useFirebase = !!FIREBASE_CONFIG.databaseURL && typeof firebase !== "undefined";
+let store;
+
+if (useFirebase) {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const ref = firebase.database().ref("gifts");
+  store = {
+    subscribe(cb) {
+      ref.on("value", snap => cb(snap.val() || {}), err => showBanner("Erro ao ler os dados: " + err.message, true));
+      firebase.database().ref(".info/connected").on("value", s => {
+        if (s.val() === false) showBanner("Sem conexão. Suas mudanças serão enviadas quando voltar.", false);
+        else showBanner("", false);
+      });
+    },
+    add(item) { return fail(ref.push({ ...item, createdAt: firebase.database.ServerValue.TIMESTAMP })); },
+    update(id, patch) { return fail(ref.child(id).update(patch)); },
+    remove(id) { return fail(ref.child(id).remove()); }
+  };
+  function fail(p) {
+    return p.catch(err => showBanner("Não foi possível salvar: " + err.message + " (confira as regras e a databaseURL do Firebase)", true));
+  }
+} else {
+  const KEY = "gift_items";
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  const save = d => localStorage.setItem(KEY, JSON.stringify(d));
+  let cb = () => {};
+  store = {
+    subscribe(fn) {
+      cb = fn; cb(load());
+      window.addEventListener("storage", e => { if (e.key === KEY) cb(load()); });
+      showBanner("Modo local: as mudanças ficam só neste aparelho. Configure o Firebase para compartilhar com a família.", false);
+    },
+    add(item) { const d = load(); d["id" + Date.now() + Math.random().toString(36).slice(2, 6)] = { ...item, createdAt: Date.now() }; save(d); cb(d); },
+    update(id, patch) { const d = load(); if (d[id]) Object.assign(d[id], patch); save(d); cb(d); },
+    remove(id) { const d = load(); delete d[id]; save(d); cb(d); }
+  };
+}
+
+function showBanner(msg, isErr) {
+  const b = $("#banner");
+  b.innerHTML = "";
+  if (!msg) return;
+  const d = document.createElement("div");
+  d.className = "banner" + (isErr ? " err" : "");
+  d.textContent = msg;
+  b.appendChild(d);
+}
+
+/* ---------- Utilidades ---------- */
+function safeUrl(u) {
+  try { const x = new URL(u); return (x.protocol === "http:" || x.protocol === "https:") ? x.href : ""; } catch { return ""; }
+}
+function el(tag, props = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v !== undefined && v !== null) n.setAttribute(k, v);
+  }
+  kids.flat().forEach(c => n.append(c));
+  return n;
+}
+
+/* ---------- Seletores de nome ---------- */
+const meSel = $("#me");
+meSel.append(el("option", { value: "" }, "— escolha seu nome —"));
+NAMES.forEach(n => meSel.append(el("option", { value: n }, n)));
+meSel.value = me;
+meSel.addEventListener("change", () => {
+  me = meSel.value;
+  localStorage.setItem("gift_me", me);
+  document.querySelectorAll("form.add select[name=giver]").forEach(s => { if (!s.dataset.touched) s.value = me; });
+  render();
+});
+
+document.querySelectorAll("form.add select[name=giver]").forEach(sel => {
+  sel.append(el("option", { value: "" }, "Ninguém ainda"));
+  NAMES.forEach(n => sel.append(el("option", { value: n }, "Eu dou: " + n)));
+  sel.value = me;
+  sel.addEventListener("change", () => { sel.dataset.touched = "1"; });
+});
+
+/* ---------- Formulários ---------- */
+document.querySelectorAll(".col").forEach(col => {
+  const kid = col.dataset.kid;
+  const form = $("form.add", col);
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const f = form.elements;
+    const title = f["title"].value.trim();
+    if (!title) return;
+    let link = f["link"].value.trim();
+    if (link && !/^[a-z][a-z0-9+.-]*:/i.test(link)) link = "https://" + link;   // "amazon.com" -> https://amazon.com
+    const url = link ? safeUrl(link) : "";
+    if (link && !url) { alert("Esse link não parece válido. Confira ou deixe em branco."); return; }
+    store.add({ kid, title, link: url, giver: f["giver"].value || "", bought: false });
+    f["title"].value = ""; f["link"].value = "";
+    f["title"].focus();
+  });
+});
+
+/* ---------- Renderização ---------- */
+function render() {
+  document.querySelectorAll(".col").forEach(col => {
+    const kid = col.dataset.kid;
+    const list = $("[data-list]", col);
+    const mine = Object.entries(items)
+      .filter(([, it]) => it && it.kid === kid)
+      .sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
+
+    const bought = mine.filter(([, it]) => it.bought).length;
+    const unclaimed = mine.filter(([, it]) => !it.giver).length;
+    $("[data-progress]", col).textContent = mine.length
+      ? `${bought} de ${mine.length} comprados · ${unclaimed} sem responsável`
+      : "Nenhum presente ainda";
+
+    list.innerHTML = "";
+    if (!mine.length) { list.append(el("li", { class: "empty" }, "Adicione a primeira ideia acima.")); return; }
+
+    mine.forEach(([id, it]) => {
+      const url = it.link ? safeUrl(it.link) : "";
+      const titleNode = url
+        ? el("a", { href: url, target: "_blank", rel: "noopener noreferrer" }, it.title)
+        : document.createTextNode(it.title);
+
+      const cb = el("input", { type: "checkbox", "aria-label": "Comprado: " + it.title });
+      cb.checked = !!it.bought;
+      cb.disabled = !it.giver;
+      cb.title = it.giver ? "" : "Escolha quem vai dar antes de marcar como comprado";
+      cb.addEventListener("change", () => store.update(id, { bought: cb.checked }));
+
+      const bottom = el("div", { class: "bottom" });
+      if (it.giver) {
+        bottom.append(el("span", { class: "chip" }, it.giver));
+        bottom.append(el("button", { type: "button", class: "ghost",
+          onclick: () => store.update(id, { giver: "", bought: false }) }, "Liberar"));
+      } else {
+        bottom.append(el("span", { class: "free" }, "Sem responsável"));
+        bottom.append(el("button", { type: "button", class: "ghost",
+          onclick: () => {
+            if (!me) { alert("Escolha seu nome no topo da página primeiro."); meSel.focus(); return; }
+            store.update(id, { giver: me });
+          } }, me ? "Eu dou" : "Eu dou (escolha seu nome)"));
+      }
+      bottom.append(el("span", { class: "spacer" }));
+      bottom.append(el("button", { type: "button", class: "danger", "aria-label": "Remover " + it.title,
+        onclick: () => { if (confirm(`Remover "${it.title}"?`)) store.remove(id); } }, "Remover"));
+
+      list.append(el("li", { class: it.bought ? "done" : "" },
+        el("div", { class: "top" }, cb, el("span", { class: "title" }, titleNode)),
+        bottom));
+    });
+  });
+}
+
+store.subscribe(data => { items = data; render(); });
+render();
+</script>
+</body>
+</html>
